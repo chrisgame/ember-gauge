@@ -1,4 +1,21 @@
-<h2 id="title">Welcome to Ember.js</h2>
+<h2 id="title">Ember Gauge Examples</h2>
 
 {{outlet}}
-{{progress-gauge}}
+{{progress-gauge
+    name='sample1'
+    icon='M0 0 H 90 V 90 H 0 Z'
+    innerColor='#00aeef'
+    outerColor='#0076be'
+    longDuration=30000
+    speedyDuration=1000
+    complete=false
+}}
+{{progress-gauge
+    name='sample2'
+    icon='M0 0 H 90 V 90 H 0 Z'
+    innerColor='#00aeef'
+    outerColor='#0076be'
+    longDuration=30000
+    speedyDuration=300
+    complete=finished
+}}
