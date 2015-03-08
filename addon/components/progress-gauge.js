@@ -1,170 +1,32 @@
 import Ember from 'ember';
+import GaugeMixin from './../mixins/gauge';
 
-export default Ember.Component.extend({
-  tagName: 'div',
-  currentPercentage: 0,
-  classNameBindings: ['name'],
-  speedUp: function(){
+export default Ember.Component.extend(GaugeMixin, {
+
+  speedUp: function() {
+    var speedyDuration = this.get('speedyDuration') || 1000;
     var complete = this.get('complete');
     if (complete) {
-      this.finish();
+      this.finish(speedyDuration);
     }
   }.observes('complete'),
 
-  didInsertElement: function(){
-    var name = this.get('name');
-    var icon = this.get('icon') || false;
-    var innerColor = this.get('innerColor') || '#5AC1E0';
-    var outerColor = this.get('outerColor') || '#05AEF3';
-    var duration = this.get('duration') || 30000;
-    var speedyDuration = this.get('speedyDuration') || 1000;
-    var gaugeObj = this.gauge(
-          name,
-          this.$()[0],
-          icon,
-          innerColor,
-          outerColor,
-          duration,
-          speedyDuration
-        );
-    this.set('controller.icon', gaugeObj);
+  animateProgressArc: function(duration) {
+    this.foreground
+      .transition()
+      .call(arcTween, this.endAngle(), this.centreText, this.progressArc())
+      .each("end", function() { this.isComplete = true; })
+      .duration(duration);
 
-    Ember.run.scheduleOnce('afterRender', this, this.start());
-  },
-
-  gauge: function(
-    name,
-    target,
-    icon,
-    innerColor,
-    outerColor,
-    duration,
-    speedyDuration
-  ) {
-
-    var targetDiv = d3.select(target),
-        width = targetDiv.node().getBoundingClientRect().width,
-        height = width,
-        radiansConversion = Math.PI/180,
-        arcRadiusRatio = 2.1,
-        centreRadiusRatio = 2.7,
-        imageRadiusRatio = 3.6,
-        startAngle = Math.acos(arcRadiusRatio / centreRadiusRatio) - Math.PI,
-        endAngle = -startAngle,
-        progressArcWidthRatio = 0.10,
-        guideArcWidthRatio = 0.0245;
-    var percentageText;
-
-    this.isComplete = false;
-
-    var progressArc = d3.svg.arc()
-      .innerRadius(height/arcRadiusRatio * (1 - progressArcWidthRatio / 2))
-      .outerRadius(height/arcRadiusRatio * (1 + progressArcWidthRatio / 2))
-      .startAngle(startAngle);
-
-    var guideArc = d3.svg.arc()
-      .innerRadius(height/arcRadiusRatio * (1 - guideArcWidthRatio / 2))
-      .outerRadius(height/arcRadiusRatio * (1 + guideArcWidthRatio / 2))
-      .startAngle(startAngle);
-
-    var svg = targetDiv.insert("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .append("g")
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-    var gradient = svg.append("svg:defs")
-      .append("svg:linearGradient")
-      .attr("id", name + "-gradient")
-      .attr("x1", "0%")
-      .attr("y1", "0%")
-      .attr("x2", "100%")
-      .attr("y2", "100%")
-      .attr("spreadMethod", "pad");
-
-    gradient.append("svg:stop")
-      .attr("offset", "0%")
-      .attr("stop-color", innerColor)
-      .attr("stop-opacity", 1);
-
-    gradient.append("svg:stop")
-      .attr("offset", "100%")
-      .attr("stop-color", outerColor)
-      .attr("stop-opacity", 1);
-
-    if (icon !== false) {
-      var centre = svg.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", height/centreRadiusRatio)
-        .style("fill", innerColor);
-    } else {
-      var centreGroup = svg.append('g');
-      var centre = centreGroup.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", height/centreRadiusRatio)
-        .style("fill", innerColor);
-
-      percentageText = centreGroup.append("text")
-        .attr("y", height/centreRadiusRatio/3)
-        .attr("text-anchor", "middle")
-        .style("font-size", height/centreRadiusRatio + "px")
-        .text(0);
-    }
-
-    var background = svg.append("path")
-      .datum({endAngle: endAngle})
-      .style("fill", "#ddd")
-      .attr("d", guideArc);
-
-    this.foreground = svg.append("path")
-      .datum({endAngle: startAngle})
-      .style("fill", "url(#" + name + "-gradient)")
-      .attr("d", progressArc);
-
-    if (icon !== false) {
-      var image = svg.append("path")
-        .style("fill", "white")
-        .attr("width", 100)
-        .attr("height", 100)
-        .attr("d", icon)
-        .attr("transform", function() {
-          var h = this.getBBox().height;
-          var w = this.getBBox().width;
-          var imageRadius = Math.sqrt(h * h + w * w) / 2;
-          var scale = height / (imageRadiusRatio * imageRadius);
-          return "translate(-" + (w * scale / 2) + ",-" + (h * scale / 2) + ") scale(" + scale + ")";
-        });
-    }
-
-    this.start = function() {
-      var self = this;
-      this.foreground
-        .transition()
-        .call(arcTween, endAngle, percentageText)
-        .each("end", function() { self.isComplete = true; })
-        .duration(duration);
-    };
-
-    this.finish = function() {
-      var self = this;
-      this.foreground
-        .transition()
-        .call(arcTween, endAngle, percentageText)
-        .each("end", function() { self.isComplete = true; })
-        .duration(speedyDuration);
-    };
-
-    function arcTween(transition, newAngle, percentageText) {
+    function arcTween(transition, newAngle, centreText, progressArc) {
       transition.attrTween("d", function(d) {
         var interpolate = d3.interpolate(d.endAngle, newAngle);
         var interpolatePercentage = d3.interpolateRound(0, 100);
 
         return function(t) {
           d.endAngle = interpolate(t);
-          if (percentageText) {
-            percentageText[0][0].innerHTML = interpolatePercentage(t);
+          if (centreText) {
+            centreText[0][0].innerHTML = interpolatePercentage(t);
           }
           return progressArc(d);
         };
@@ -172,5 +34,53 @@ export default Ember.Component.extend({
       var power = 2 + Math.random() * 2;
       transition.ease("poly-out", power);
     }
-  }
+  },
+
+  finish: function(speedyDuration) {
+    this.foreground
+      .transition()
+      .call(arcTween, this.endAngle(), this.centreText, this.progressArc())
+      .each("end", function() { this.isComplete = true; })
+      .duration(speedyDuration);
+
+    function arcTween(transition, newAngle, centreText, progressArc) {
+      transition.attrTween("d", function(d) {
+        var interpolate = d3.interpolate(d.endAngle, newAngle);
+        var interpolatePercentage = d3.interpolateRound(0, 100);
+
+        return function(t) {
+          d.endAngle = interpolate(t);
+          if (centreText) {
+            centreText[0][0].innerHTML = interpolatePercentage(t);
+          }
+          return progressArc(d);
+        };
+      });
+      var power = 2 + Math.random() * 2;
+      transition.ease("poly-out", power);
+    }
+  },
+
+  didInsertElement: function() {
+    var name = this.get('name');
+    var icon = this.get('icon') || false;
+    var innerColor = this.get('innerColor') || '#5AC1E0';
+    var outerColor = this.get('outerColor') || '#05AEF3';
+    var duration = this.get('duration') || 7000;
+
+    this.insertSvg();
+    this.appendGradient(name, innerColor, outerColor);
+    this.appendCentreGroup();
+    this.appendCentreCircle(innerColor);
+    this.appendGuideArc();
+    this.appendProgressArc();
+
+    if (icon !== false) {
+      this.appendIcon(icon, this.height());
+    } else {
+      this.appendCentreText();
+    }
+
+    Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
+  },
 });
