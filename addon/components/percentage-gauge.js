@@ -3,10 +3,6 @@ import GaugeMixin from './../mixins/gauge';
 
 export default Ember.Component.extend(GaugeMixin, {
 
-  percentage: function() {
-    return this.percentage || 0;
-  },
-
   percentageAngle: function() {
     return ((this.endAngle() * 2) * (this.percentage / 100)) - this.endAngle();
   },
@@ -35,12 +31,17 @@ export default Ember.Component.extend(GaugeMixin, {
     }
   },
 
+  startAnimation: function() {
+    var duration = this.get('duration') || 7000;
+
+    Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
+  }.observes('percentage'),
+
   didInsertElement: function() {
     var name = this.get('name');
     var icon = this.get('icon') || false;
     var innerColor = this.get('innerColor') || '#5AC1E0';
     var outerColor = this.get('outerColor') || '#05AEF3';
-    var duration = this.get('duration') || 7000;
 
     this.insertSvg();
     this.appendGradient(name, innerColor, outerColor);
@@ -55,6 +56,8 @@ export default Ember.Component.extend(GaugeMixin, {
       this.appendCentreText();
     }
 
-    Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
+    if (this.percentage) {
+      this.startAnimation();
+    }
   },
 });
