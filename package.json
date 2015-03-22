@@ -1,6 +1,6 @@
 {
   "name": "ember-gauge",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A collection of gauge components",
   "directories": {
     "doc": "doc",
