@@ -6,6 +6,9 @@ export default Em.Route.extend({
     var self = this;
     Em.run.later(self, function() {
       self.controller.set('finished', true);
+      self.controller.set('oneHundredPercent', 100);
+      self.controller.set('seventyFivePercent', 75);
+      self.controller.set('fiftyPercent', 50);
     }, 3000);
   }
 });
