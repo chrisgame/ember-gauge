@@ -43,29 +43,6 @@ export default Ember.Mixin.create({
     this.set("svg", svg);
   },
 
-  appendGradient: function(name, innerColor, outerColor) {
-    var gradient = this.svg.append("svg:defs")
-      .append("svg:linearGradient")
-      .attr("id", name + "-gradient")
-      .attr("x1", "0%")
-      .attr("y1", "0%")
-      .attr("x2", "100%")
-      .attr("y2", "100%")
-      .attr("spreadMethod", "pad");
-
-    gradient.append("svg:stop")
-      .attr("offset", "0%")
-      .attr("stop-color", innerColor)
-      .attr("stop-opacity", 1);
-
-    gradient.append("svg:stop")
-      .attr("offset", "100%")
-      .attr("stop-color", outerColor)
-      .attr("stop-opacity", 1);
-
-    this.set("gradient", gradient);
-  },
-
   appendIcon: function(icon, height) {
     this.svg.append("path")
       .style("fill", "white")
@@ -93,7 +70,7 @@ export default Ember.Mixin.create({
         .attr("cx", 0)
         .attr("cy", 0)
         .attr("r", this.height()/this.centreRadiusRatio)
-        .style("fill", innerColor);
+        .attr("class", "centre-circle");
   },
 
   appendCentreText: function() {
@@ -130,7 +107,7 @@ export default Ember.Mixin.create({
   appendProgressArc: function() {
     var foreground = this.svg.append("path")
       .datum({endAngle: this.startAngle()})
-      .style("fill", "url(#" + this.name + "-gradient)")
+      .attr("class", "progress-arc")
       .attr("d", this.progressArc());
 
     this.set('foreground', foreground);

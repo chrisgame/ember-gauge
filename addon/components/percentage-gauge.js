@@ -40,13 +40,10 @@ export default Ember.Component.extend(GaugeMixin, {
   didInsertElement: function() {
     var name = this.get('name');
     var icon = this.get('icon') || false;
-    var innerColor = this.get('innerColor') || '#5AC1E0';
-    var outerColor = this.get('outerColor') || '#05AEF3';
 
     this.insertSvg();
-    this.appendGradient(name, innerColor, outerColor);
     this.appendCentreGroup();
-    this.appendCentreCircle(innerColor);
+    this.appendCentreCircle();
     this.appendGuideArc();
     this.appendProgressArc();
 
