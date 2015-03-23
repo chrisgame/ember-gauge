@@ -65,7 +65,7 @@ export default Ember.Mixin.create({
     this.set("centreGroup", centreGroup);
   },
 
-  appendCentreCircle: function(innerColor) {
+  appendCentreCircle: function() {
       this.centreGroup.append("circle")
         .attr("cx", 0)
         .attr("cy", 0)

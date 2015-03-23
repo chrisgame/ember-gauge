@@ -38,7 +38,6 @@ export default Ember.Component.extend(GaugeMixin, {
   }.observes('percentage'),
 
   didInsertElement: function() {
-    var name = this.get('name');
     var icon = this.get('icon') || false;
 
     this.insertSvg();

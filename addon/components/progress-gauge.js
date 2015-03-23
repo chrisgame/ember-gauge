@@ -62,7 +62,6 @@ export default Ember.Component.extend(GaugeMixin, {
   },
 
   didInsertElement: function() {
-    var name = this.get('name');
     var icon = this.get('icon') || false;
     var duration = this.get('duration') || 7000;
 
