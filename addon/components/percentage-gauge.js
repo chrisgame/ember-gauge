@@ -34,7 +34,7 @@ export default Ember.Component.extend(GaugeMixin, {
   startAnimation: Ember.observer('percentage', function() {
     var duration = this.get('duration') || 7000;
 
-    Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
+    Ember.run.scheduleOnce('afterRender', this, this.animateProgressArc, duration);
   }),
 
   didInsertElement: function() {
