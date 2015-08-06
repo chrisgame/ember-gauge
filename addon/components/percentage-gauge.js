@@ -31,11 +31,11 @@ export default Ember.Component.extend(GaugeMixin, {
     }
   },
 
-  startAnimation: function() {
+  startAnimation: Ember.observer('percentage', function() {
     var duration = this.get('duration') || 7000;
 
     Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
-  }.observes('percentage'),
+  }),
 
   didInsertElement: function() {
     var icon = this.get('icon') || false;

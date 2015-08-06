@@ -3,13 +3,13 @@ import GaugeMixin from './../mixins/gauge';
 
 export default Ember.Component.extend(GaugeMixin, {
 
-  speedUp: function() {
+  speedUp: Ember.observer('complete', function() {
     var speedyDuration = this.get('speedyDuration') || 1000;
     var complete = this.get('complete');
     if (complete) {
       this.finish(speedyDuration);
     }
-  }.observes('complete'),
+  }),
 
   animateProgressArc: function(duration) {
     this.foreground
