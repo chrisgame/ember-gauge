@@ -4,14 +4,14 @@ import GaugeMixin from './../mixins/gauge';
 export default Ember.Component.extend(GaugeMixin, {
 
   percentageAngle: function() {
-    return ((this.endAngle() * 2) * (this.percentage / 100)) - this.endAngle();
+    return ((this.endAngle() * 2) * (this.get('percentage') / 100)) - this.endAngle();
   },
 
   animateProgressArc: function(duration) {
     this.foreground
       .transition()
-      .call(arcTween, this.percentageAngle(), this.centreText, this.percentage, this.progressArc())
-      .duration(duration * (this.percentage / 100));
+      .call(arcTween, this.percentageAngle(), this.centreText, this.get('percentage'), this.progressArc())
+      .duration(duration * (this.get('percentage') / 100));
 
     function arcTween(transition, newAngle, centreText, percentage, progressArc) {
       transition.attrTween("d", function(d) {
@@ -31,11 +31,11 @@ export default Ember.Component.extend(GaugeMixin, {
     }
   },
 
-  startAnimation: function() {
+  startAnimation: Ember.observer('percentage', function() {
     var duration = this.get('duration') || 7000;
 
-    Ember.run.scheduleOnce('afterRender', this.animateProgressArc(duration));
-  }.observes('percentage'),
+    Ember.run.scheduleOnce('afterRender', this, this.animateProgressArc, duration);
+  }),
 
   didInsertElement: function() {
     var icon = this.get('icon') || false;
@@ -52,7 +52,7 @@ export default Ember.Component.extend(GaugeMixin, {
       this.appendCentreText();
     }
 
-    if (this.percentage) {
+    if (this.get('percentage')) {
       this.startAnimation();
     }
   },
